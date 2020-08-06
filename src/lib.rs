@@ -1,8 +1,6 @@
 use borsh::{BorshDeserialize, BorshSerialize};
 use near_sdk::collections::{TreeMap};
 use near_sdk::{near_bindgen, AccountId, env};
-use serde::{Serialize, Deserialize};
-use serde_json::json;
 use near_sdk::json_types::U128;
 
 #[global_allocator]
@@ -11,8 +9,6 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize)]
 pub struct CollectionIssues {
-    treemap_num: TreeMap<u128, String>,
-    treemap: TreeMap<String, String>,
     nested_treemap: TreeMap<AccountId, TreeMap<u128, String>>,
 }
 
@@ -27,26 +23,8 @@ impl CollectionIssues {
     #[init]
     pub fn new() -> Self {
         Self {
-            treemap_num: TreeMap::new(b"m".to_vec()),
-            treemap: TreeMap::new(b"t".to_vec()),
             nested_treemap: TreeMap::new(b"n".to_vec())
         }
-    }
-
-    pub fn insert_treemap_string(&mut self, key: String, val: String) {
-        self.treemap.insert(&key, &val);
-    }
-
-    pub fn remove_treemap_string(&mut self, key: String) {
-        self.treemap.remove(&key);
-    }
-
-    pub fn insert_treemap_num(&mut self, key: U128, val: String) {
-        self.treemap_num.insert(&key.into(), &val);
-    }
-
-    pub fn remove_treemap_num(&mut self, key: U128) {
-        self.treemap_num.remove(&key.into());
     }
 
     pub fn insert_nested_treemap_num(&mut self, key: U128, val: String) {
@@ -116,26 +94,6 @@ mod tests {
             epoch_height: 0,
         }
     }
-
-    #[test]
-    fn test_double_add() {
-        let context = get_context();
-        testing_env!(context);
-        let mut contract = CollectionIssues::new();
-        contract.insert_treemap_string("sasha".to_string(), "services".to_string());
-        contract.insert_treemap_string("sasha".to_string(), "dervishes".to_string());
-    }
-
-    #[test]
-    fn test_add_remove_add() {
-        let context = get_context();
-        testing_env!(context);
-        let mut contract = CollectionIssues::new();
-        contract.insert_treemap_string("sasha".to_string(), "services".to_string());
-        contract.remove_treemap_string("sasha".to_string());
-        contract.insert_treemap_string("sasha".to_string(), "dervishes".to_string());
-    }
-
 
     #[test]
     fn test_break_nested() {
